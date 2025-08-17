@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Token {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  symbol                String
+  address               String    @unique
+  totalSupply           String?
+  decimals              Int?
+  priceUsd              Float?
+  marketCapUsd          Float?
+  volume24hUsd          Float?
+  updatedAt             DateTime
+  createdAt             DateTime  @default(now())
+  categories            String[]  @default([])
+  coingeckoId           String?
+  createdAtBlock        Int?
+  description           String?
+  firstSeen             DateTime  @default(now())
+  github                String?
+  isVerified            Boolean   @default(false)
+  marketCapRank         Int?
+  twitter               String?
+  website               String?
+  burnedTokensPercent   Float?
+  canBlacklist          Boolean   @default(false)
+  canMint               Boolean   @default(false)
+  canPause              Boolean   @default(false)
+  contractCreator       String?
+  contractSourceCode    String?
+  creationTxHash        String?
+  creatorHoldingPercent Float?
+  dexListings           String[]  @default([])
+  githubForks           Int?
+  githubStars           Int?
+  hasEmergencyStop      Boolean   @default(false)
+  hasOwner              Boolean   @default(false)
+  holderHistory         Json?
+  isProxy               Boolean   @default(false)
+  lastCommitDate        DateTime?
+  lastRiskAssessment    DateTime?
+  liquidityLocked       Boolean   @default(false)
+  liquidityLockedUntil  DateTime?
+  liquidityUsd          Float?
+  ownerAddress          String?
+  priceChange1h         Float?
+  priceChange24h        Float?
+  priceChange7d         Float?
+  priceHistory          Json?
+  redditSubscribers     Int?
+  riskFactors           String[]  @default([])
+  rugpullRiskScore      Float?
+  telegramMembers       Int?
+  top10HoldersPercent   Float?
+  top50HoldersPercent   Float?
+  totalHolders          Int?
+  tradingVolume1h       Float?
+  twitterFollowers      Int?
+  volumeHistory         Json?
+}
+
+model riddle {
+  id            Int             @id @default(autoincrement())
+  createDate    DateTime?       @db.Timestamp(6)
+  type          String?         @db.VarChar(50)
+  question      String?
+  isFirst       Boolean?
+  isAsked       Boolean?
+  answerTime    DateTime?       @db.Timestamp(6)
+  riddle_answer riddle_answer[]
+}
+
+model riddle_answer {
+  id         Int       @id @default(autoincrement())
+  createDate DateTime? @db.Timestamp(6)
+  riddleId   Int
+  answer     String?
+  riddle     riddle    @relation(fields: [riddleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model btc_klines {
+  open_time                    DateTime  @id @db.Timestamptz(6)
+  open                         Float?
+  high                         Float?
+  low                          Float?
+  close                        Float?
+  volume                       Float?
+  close_time                   DateTime? @db.Timestamptz(6)
+  quote_asset_volume           Float?
+  number_of_trades             Int?
+  taker_buy_base_asset_volume  Float?
+  taker_buy_quote_asset_volume Float?
+}
+
+model pulse_predictions {
+  id            Int       @id @default(autoincrement())
+  token_address String?   @db.VarChar
+  token_name    String?   @db.VarChar
+  prediction    Int?
+  probability   Float?
+  features      Json?     @db.Json
+  created_at    DateTime? @db.Timestamp(6)
+  model_version Float?
+
+  @@index([token_address], map: "ix_pulse_predictions_token_address")
+}
+
+model pulse_users {
+  id            Int       @id @default(autoincrement())
+  username      String?   @unique(map: "ix_pulse_users_username") @db.VarChar(64)
+  email         String?   @unique(map: "ix_pulse_users_email") @db.VarChar(120)
+  password_hash String?   @db.VarChar(512)
+  is_admin      Boolean?
+  isActive      Boolean?
+  created_at    DateTime? @db.Timestamp(6)
+}
+
+model rug_sherlock_analysis {
+  id                          Int      @default(autoincrement())
+  token_address               String
+  timestamp                   DateTime @db.Timestamptz(6)
+  network                     String?
+  token_name                  String?
+  last_price                  Decimal? @db.Decimal
+  volume                      Decimal? @db.Decimal
+  price_change_percentage_30d String?
+  max_drawdown_30d            String?
+  recovery_rate_30d           String?
+  holder_count                Int?
+  coin_id                     String?
+  volatility_30d              String?
+  top_5_holders               Json?
+  raw_data                    Json?
+
+  @@id([id, timestamp])
+  @@index([token_address], map: "idx_rug_sherlock_token_address")
+  @@index([timestamp(sort: Desc)])
+}
+
+// Simple Echo predictions model for the game
+model predictions {
+  prediction_time        DateTime  @id @db.Timestamptz(6)
+  time_window            String    @db.VarChar(20)
+  next_time_window       String    @db.VarChar(20)
+  next_open_price_change Float
+  direction_strength     Float
+  total_strength         Float
+  direction              String    @db.VarChar(10)
+  additional_info        Json?
+  created_at             DateTime? @default(now()) @db.Timestamptz(6)
+}
