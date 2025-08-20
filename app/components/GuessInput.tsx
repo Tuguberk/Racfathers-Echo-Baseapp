@@ -3,65 +3,125 @@
 import { useState } from "react";
 
 interface GuessInputProps {
-  onGuessSubmit: (guess: number) => void;
+  onGuessSubmit: (direction: "UP" | "DOWN") => void;
   disabled?: boolean;
+  echoDirection?: "UP" | "DOWN";
+  echoConfidence?: number;
 }
 
 export function GuessInput({
   onGuessSubmit,
   disabled = false,
+  echoDirection,
+  echoConfidence,
 }: GuessInputProps) {
-  const [guess, setGuess] = useState<string>("");
+  const [selectedDirection, setSelectedDirection] = useState<
+    "UP" | "DOWN" | null
+  >(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = (direction: "UP" | "DOWN") => {
     if (isSubmitting || disabled) return;
 
-    const numericGuess = parseFloat(guess);
-    if (isNaN(numericGuess)) {
-      alert("Please enter a valid number");
-      return;
-    }
-
     setIsSubmitting(true);
-    onGuessSubmit(numericGuess);
-    setGuess("");
-    setIsSubmitting(false);
+    setSelectedDirection(direction);
+    onGuessSubmit(direction);
+
+    // Reset after a short delay to show the selection
+    setTimeout(() => {
+      setIsSubmitting(false);
+    }, 1000);
   };
 
   return (
-    <div className="bg-gray-700 rounded-lg p-4">
-      <h3 className="font-semibold mb-4">Make Your Prediction</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Predicted Price Change (%)
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            placeholder="e.g., 2.5 or -1.8"
-            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={disabled || isSubmitting}
-            required
-          />
-          <p className="text-xs text-gray-400 mt-1">
-            Enter a positive number for price increase, negative for decrease
-          </p>
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-6 border border-amber-600/30">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-amber-200 mb-2">
+          🎯 Make Your Move, Family
+        </h3>
+        <p className="text-amber-300/80 text-sm">
+          Will Bitcoin rise or fall in the next 1 hour?
+        </p>
+      </div>
+
+      {echoDirection && (
+        <div className="mb-6 p-4 bg-purple-900/30 border border-purple-600/50 rounded-lg">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <span className="text-purple-200">🤖</span>
+            <span className="text-purple-200 font-semibold">
+              Echo&apos;s Prediction:
+            </span>
+          </div>
+          <div className="text-center">
+            <span
+              className={`text-2xl font-bold ${echoDirection === "UP" ? "text-green-400" : "text-red-400"}`}
+            >
+              {echoDirection === "UP" ? "📈 RISE" : "📉 FALL"}
+            </span>
+            {echoConfidence && (
+              <div className="text-purple-300 text-sm mt-1">
+                Confidence: {echoConfidence.toFixed(1)}
+              </div>
+            )}
+          </div>
         </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          onClick={() => handleSubmit("UP")}
+          disabled={disabled || isSubmitting}
+          className={`
+            relative p-6 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105
+            ${selectedDirection === "UP" ? "bg-green-600 scale-105" : "bg-green-500/20 hover:bg-green-500/40"}
+            ${disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg hover:shadow-green-500/25"}
+            border-2 border-green-500/50 text-green-100
+          `}
+        >
+          <div className="flex flex-col items-center space-y-2">
+            <span className="text-3xl">📈</span>
+            <span>RISE</span>
+            <span className="text-sm opacity-75">Bitcoin goes UP</span>
+          </div>
+          {selectedDirection === "UP" && (
+            <div className="absolute inset-0 bg-green-400/20 rounded-lg animate-pulse"></div>
+          )}
+        </button>
 
         <button
-          type="submit"
-          disabled={disabled || isSubmitting || !guess.trim()}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded-lg font-semibold transition-colors"
+          onClick={() => handleSubmit("DOWN")}
+          disabled={disabled || isSubmitting}
+          className={`
+            relative p-6 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105
+            ${selectedDirection === "DOWN" ? "bg-red-600 scale-105" : "bg-red-500/20 hover:bg-red-500/40"}
+            ${disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg hover:shadow-red-500/25"}
+            border-2 border-red-500/50 text-red-100
+          `}
         >
-          {isSubmitting ? "Submitting..." : "Submit Guess"}
+          <div className="flex flex-col items-center space-y-2">
+            <span className="text-3xl">📉</span>
+            <span>FALL</span>
+            <span className="text-sm opacity-75">Bitcoin goes DOWN</span>
+          </div>
+          {selectedDirection === "DOWN" && (
+            <div className="absolute inset-0 bg-red-400/20 rounded-lg animate-pulse"></div>
+          )}
         </button>
-      </form>
+      </div>
+
+      {isSubmitting && (
+        <div className="mt-4 text-center">
+          <div className="inline-flex items-center space-x-2 text-amber-300">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-400"></div>
+            <span>Processing your choice...</span>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 text-center text-amber-300/60 text-xs">
+        &quot;In this family, everyone&apos;s got an opinion. What&apos;s
+        yours?&quot;
+      </div>
     </div>
   );
 }

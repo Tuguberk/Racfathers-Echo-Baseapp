@@ -53,7 +53,7 @@ DATABASE_URL="postgresql://username:password@localhost:5432/pulse_echo_game?sche
 PRICE_API_BASE_URL="https://api.binance.com/api/v3/klines"
 
 # OnchainKit (existing)
-NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=pulse-miniapp
+NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=echo-miniapp
 NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_api_key
 ```
 
@@ -165,3 +165,26 @@ Default implementation uses Binance API with fallback to mock data. Benefits of 
 ## License
 
 MIT License - See LICENSE file for details
+
+## Docker
+
+Quick start with Docker:
+
+1. Copy env example
+
+- cp .env.example .env
+- Adjust values if needed
+
+2. Build and start
+
+- docker compose up --build
+
+3. Access app
+
+- http://localhost:3000
+
+Notes
+
+- The compose file starts a Postgres 16 instance and the Next.js app.
+- Prisma migrations are applied on container start (migrate deploy).
+- To seed data, exec into the web container and run: npm run db:seed

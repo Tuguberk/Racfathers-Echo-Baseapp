@@ -1,5 +1,5 @@
 {
-  "name": "pulse-miniapp",
+  "name": "echo-miniapp",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,6 +12,7 @@
     "test:binance": "node scripts/test-binance.mjs"
   },
   "dependencies": {
+    "@coinbase/onchainkit": "^0.38.19",
     "@farcaster/frame-sdk": "^0.1.8",
     "@prisma/client": "^6.14.0",
     "@tanstack/react-query": "^5",

@@ -7,9 +7,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// Disable caching for all pages in this app
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "default-no-store";
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Bitcoin Pulse Game",
+    title: "Bitcoin Echo Game",
     description: "A simple Bitcoin price prediction game with AI predictions",
   };
 }
