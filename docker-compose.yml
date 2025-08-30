@@ -31,6 +31,31 @@ services:
       NEXT_PUBLIC_APP_OG_DESCRIPTION: ${NEXT_PUBLIC_APP_OG_DESCRIPTION}
       NEXT_PUBLIC_APP_OG_IMAGE: ${NEXT_PUBLIC_APP_OG_IMAGE}
       PRICE_API_BASE_URL: ${PRICE_API_BASE_URL}
-    ports:
-      - "3006:3000"
+    # Do NOT publish host ports; Traefik will route to this container over the shared "proxy" network.
+    expose:
+      - "3000"   # internal app port
     restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      # (optional) explicit docker network for Traefik
+      - traefik.docker.network=proxy
+
+      # Router
+      - traefik.http.routers.echo-miniapp.rule=Host(`echo-miniapp.racfathers.io`)
+      - traefik.http.routers.echo-miniapp.entrypoints=websecure
+      - traefik.http.routers.echo-miniapp.tls=true
+      - traefik.http.routers.echo-miniapp.tls.certresolver=le
+
+      # Service (internal port your app listens on)
+      - traefik.http.services.echo-miniapp.loadbalancer.server.port=3000
+
+      # Middlewares (optional)
+      - traefik.http.middlewares.echo-miniapp-compress.compress=true
+      - traefik.http.routers.echo-miniapp.middlewares=echo-miniapp-compress
+
+networks:
+  proxy:
+    external: true
+    name: proxy
